@@ -3,7 +3,7 @@ VennPlot
 
 This is a Java program for drawing rotationally symmetric Venn diagrams that are simple and monotone. Any closed curve divides the plane into two regions : the interior of the curve and the exterior of the curve. With a collection of n curves therefore, we can have up to 2^n different regions. An n-Venn diagram is defined as a collection of n closed curves containing exactly 2^n regions where each region is in the interior of a unique subset of the curves.
 
-Labelling the curves of an n-Venn diagram from 1 to n, we associate a binary number r to a region, called the rank of the region, where the i-th bit is 1 if curve number i contains the region, otherwise it is 0. The number of curves containing a region, which is the same as the number of 1's in the rank of the region, is called the weight of the region.
+Labelling the curves of an n-Venn diagram from 1 to n, we associate a binary number r to each region, called the rank of the region, where the i-th bit is 1 if curve number i contains the region, otherwise it is 0. The number of curves containing a region, which is the same as the number of 1's in the rank of the region, is called the weight of the region.
 
 A Venn diagram is simple if no more than two curves intersect at any given point. A monotone Venn digram is the one in which any region of weight k is adjacent to at least one region of weight k + 1 and is also adjacent to at least one region of weight k-1.
 
