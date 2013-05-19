@@ -39,8 +39,8 @@ The program takes 5 arguments as input which are :
 <li>n : The number of curves</li>
 <li>input-file-name : The name of the file containing the crossing sequences.
 This file contains the crossing sequence of the Venn diagrams we want to draw.
-Each diagram is given as a sequence of (2^n-2)/n integers between 0 and n-2 and separated by a space.</li>
-<li>colors-file-name : The name of the file containing the codes of filling/stroke colours.
+Each diagram is given as a sequence of (2^n-2)/n integers in range [0, n-2] and separated by a space.</li>
+<li>colours-file-name : The name of the file containing the codes of filling/stroke colours.
 This files contains an integer n as the number of colours followed by n colour codes in hexadecimal format, for example, #FF0000 for the red colour.</li>
 <li>filling-mode : Indicates the filling style. 1 : filled, 0 : not-filled.</li>
 <li>drawing-mode : Indicates the style of drawing. 0 : Radial, 1 : Cylindrical.</li>
