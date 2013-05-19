@@ -11,33 +11,37 @@ A rotationally symmetric Venn diagram consists of n congruent pie slices. A pie 
 
 For example the famous three circle Venn diagram can be represented by the following binary matrix and crossing sequence.
 
-   A pie-slice of symmetric 3-Venn diagram : 
+<p><blockcode><pre>
+A pie-slice of symmetric 3-Venn diagram :<br> 
                             ____   ___________
                                 \ /
-                                 *
+                                 o
                             ____/ \____   ____
                                        \ /
-                                        *
+                                        o
                             ___________/ \____
+   
+</pre></blockcode></p>
+<p><blockcode><pre>
+   Binary Matrix :              1      0          
                             
-    Binary Matrix :              1      0          
-                            
-                                 0       1
+                                0       1
                                  
-                              ---------------
+                             ---------------
                                  
-    Crossing Sequence :          0   ,   1  
+   Crossing Sequence :          0   ,   1
+</pre></blockcode></p>
 
 Given the crossing sequence of a simple symmetric n-Venn diagram as input, this program creates an SVG file of the Venn diagram.
 
 The program takes 5 arguments as input which are :
-n : The number of curves
-input-file-name : The name of the file containing the crossing sequences.
+<ul>
+<li>n : The number of curves</li>
+<li>input-file-name : The name of the file containing the crossing sequences.
 This file contains the crossing sequence of the Venn diagrams we want to draw.
-Each diagram is given as a sequence of (2^n-2)/n integers numbers between 0 and n-2 and separated by a space.
-
-colors-file-name : The name of the file containing the codes of filling/stroke colours.
-This files contains an integer n as the number of colours followed by n colour codes in hexadecimal format, for example, #FF0000 for the red colour. 
-
-filling-mode : Indicates the filling style. 1 : filled, 0 : not-filled.
-drawing-mode : Indicates the style of drawing. 0 : Radial, 1 : Cylindrical.
+Each diagram is given as a sequence of (2^n-2)/n integers numbers between 0 and n-2 and separated by a space.</li>
+<li>colors-file-name : The name of the file containing the codes of filling/stroke colours.
+This files contains an integer n as the number of colours followed by n colour codes in hexadecimal format, for example, #FF0000 for the red colour.</li>
+<li>filling-mode : Indicates the filling style. 1 : filled, 0 : not-filled.</li>
+<li>drawing-mode : Indicates the style of drawing. 0 : Radial, 1 : Cylindrical.</li>
+</ul>
