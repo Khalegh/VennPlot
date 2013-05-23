@@ -1418,7 +1418,7 @@ public class VennDiagram {
 		            originX = destinationX;
 		            originY = destinationY;
 		            
-		            //While we have reached to the starting point.
+		            //While we haven't reached to the starting point.
 		        } while(row != 0 || column != 0 || dir == -1);
 	    	
 	            curveStr = curveStr + "\" stroke=\"" + colors[curveNo] + "\" stroke-width=\"1.0\" fill=\"none\"/>";
