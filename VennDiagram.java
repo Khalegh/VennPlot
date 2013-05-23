@@ -42,7 +42,7 @@ import java.io.PrintWriter;
  */
 
 public class VennDiagram {
-  
+	
 	/** static counter for the number of diagrams generated so far. */
     private static int diagramNo = 0;
     
@@ -132,7 +132,7 @@ public class VennDiagram {
         }
                 
         //Creating the Venn points
-        makePoints();
+        getPointStrings();
         
         //Adjusting the point coordinates such that at each points the two crossing curves are perpendicular.
         adjustPoints();
@@ -169,7 +169,7 @@ public class VennDiagram {
      * Creates the Venn point matrix of the diagram. For each intersection point this matrix contains the list and location of its adjacent
      * intersection points.
      */
-    private void makePoints() {
+    private void getPointStrings() {
         
         //The middle row is the reference row (It has a height of 0).
         double middleRow = (n - 2) / 2.0;
@@ -451,7 +451,7 @@ public class VennDiagram {
      * @return			The x coordinate of the point in Euclidean coordinate system
      */
     private double polarX(double theta, double phi){
-        return 50.0 * Math.cos(theta)/Math.tan(Math.PI/4 - phi/2);
+        return (1 << (n / 2)) * Math.cos(theta)/Math.tan(Math.PI/4 - phi/2.0);
     }
     
     /**
@@ -461,7 +461,7 @@ public class VennDiagram {
      * @return			The x coordinate of the point in Euclidean coordinate system
      */
     private double polarY(double theta, double phi){
-        return 50.0 * Math.sin(theta)/Math.tan(Math.PI/4 - phi/2);
+        return (1 << (n / 2)) * Math.sin(theta)/Math.tan(Math.PI/4 - phi/2.0);
     }
         
     /**
@@ -474,34 +474,162 @@ public class VennDiagram {
     }
     
     /**
-     * Normalize (scale up and transform) the input x,y coordinates of the Venn point depending on the mode of drawing.
+     * Returns the string of the physical coordinates of the Venn point depending on the mode of drawing.
      * 
      * @param sector	The sector of the diagram containing the Venn Point. 
      * @param mode		The mode of drawing; 0 : regular (radial)  1 : Cylindrical
      * @param x			The raw x coordinate
      * @param y			The raw y coordinate
-     * @return			The string of the normalized coordinates.
+     * @return			The string of the physical coordinates.
      */
-    private String makePoint(int sector, int mode, double x, double y) {
-    	double ratio = 5 * n;
-    	//Compute the cylindrical coordinates of the point
-        double theta = x * horizontalUnitLen + sector * 2 * Math.PI / n;;
-        double phi = y * verticalUnitLen; ;
+    private String getPointString(int sector, int mode, double x, double y) {
+        double pointX = transformX(x, y, sector, mode);
+        double pointY = transformY(x, y, sector, mode);
         
-        double pointX;
-        double pointY;
+        return String.format("%f,%f ", pointX, pointY);
+    }
+    
+    /**
+     * Computes the actual x-coordinate of the given point given with respect to the drawing mode.
+     * @param x			The initial x-coordinate of the point in the Venn point matrix.
+     * @param y			The initial y-coordinate of the point in the Venn point matrix.
+     * @param sector	The sector of the diagram containing the point.
+     * @param mode		The drawing mode. 0 : regular, 1 : cylindrical.
+     * @return
+     */
+    private double transformX(double x, double y, int sector, int mode) {
+    	double transformedX;
+       	double ratio = 5 * n;
+    	//Compute the cylindrical coordinates of the point
+        double theta = x * horizontalUnitLen + sector * 2 * Math.PI / n;
+        double phi = y * verticalUnitLen; 
         
         if (mode == 0) {
         //Compute and scale up the Euclidean coordinates of the point for regular drawing
-        	pointX =  horizontalOffset + ratio * polarX(theta, phi);
-        	pointY =  verticalOffset + ratio * polarY(theta, phi);
+        	transformedX =  horizontalOffset + ratio * polarX(theta, phi);
         }
         else {
-        	pointX = horizontalOffset + n * n * n * theta;
-        	pointY = verticalOffset + phi * n * n * n;
+        	transformedX = horizontalOffset + n * n * n * theta;
         }
         
-        return String.format("%f,%f ", pointX, pointY);
+        return transformedX;
+    }
+    
+    /**
+     * Computes the actual y-coordinate of the given point given with respect to the drawing mode.
+     * @param x			The initial x-coordinate of the point in the Venn point matrix.
+     * @param y			The initial y-coordinate of the point in the Venn point matrix.
+     * @param sector	The sector of the diagram containing the point.
+     * @param mode		The drawing mode. 0 : regular, 1 : cylindrical.
+     * @return
+     */
+    private double transformY(double x, double y, int sector, int mode) {
+    	double transformedY;
+       	double ratio = 5 * n;
+    	//Compute the cylindrical coordinates of the point
+        double theta = x * horizontalUnitLen + sector * 2 * Math.PI / n;
+        double phi = y * verticalUnitLen; 
+        
+        if (mode == 0) {
+        //Compute and scale up the Euclidean coordinates of the point for regular drawing
+        	transformedY =  verticalOffset + ratio * polarY(theta, phi);
+        }
+        else {
+        	transformedY = verticalOffset + phi * n * n * n;
+        }
+        
+        return transformedY;
+    }
+    
+    /**
+     * Gives the description of an elliptical curve from the point (x1,y1) to point (x2, y2).
+     * @param sector		The sector of Venn diagram containing the points.
+     * @param mode			Mode of drawing. 0 : regular, 1: cylindrical.
+     * @param x1			The x-coordinate of the first point.
+     * @param y1			The y-coordinate of the first point.
+     * @param x2			The x-coordinate of the second point.
+     * @param y2			The y coordinate of the second point.
+     * @param dir			The direction of drawing. 1 : clockwise, -1 : counter clockwise.
+     * @param row			The row of the Venn-Point matrix containing the points.
+     * @param leveled		Indicates if the two points have the same height. 0 : same height, 1 : different height.			
+     * @return				Description of the elliptical curve.
+     */
+    
+    private String drawEllipticalCurve(int sector, int mode, double x1, double y1, double x2, double y2, int dir, int row, int leveled) {
+    	
+    	double [] rx_coef3 = {1.0, 3.0};
+    	double [] rx_coef5 = {0.51, 0.65, 1.0, 1.5};
+    	double [] rx_coef7 = {0.58, 0.72, 0.78, 0.84, 0.9, 1.2}; 
+    	double [] rx_coef11 = {0.65, 0.72, 0.73, 0.74, 0.74, 0.75, 0.78, 0.8, 0.85, 0.95}; 
+    	double [] rx_coef13 = {0.65, 0.72, 0.73, 0.75, 0.76, 0.76, 0.76, 0.77, 0.78, 0.8, 0.85, 0.95}; 
+    	
+    	//Get the physical coordinates.
+		double px1 = transformX(x1, y1, sector, mode);
+		double py1 = transformY(x1, y1, sector, mode);
+		double px2 = transformX(x2, y2, sector, mode);
+		double py2 = transformY(x2, y2, sector, mode);
+		
+		//Compute the distance between the two points.
+    	double distance = Math.sqrt((px1 - px2) * (px1 - px2) + (py1 - py2) * (py1 - py2));
+	
+		//Drawing elliptical curve in regular mode.
+    	if (mode == 0) {
+    		int sflag = (dir == 1) ? 1 : 0;
+    		double alpha = x1 * horizontalUnitLen + sector * 2 * Math.PI / n;
+    		double beta = x2 * horizontalUnitLen + sector * 2 * Math.PI / n;
+    		double angle  = (Math.PI  + alpha + beta) / 2.0;
+    		angle = 180 * angle / Math.PI;
+    	
+    		double rx = 1.0;
+    		switch (n) {
+    		case 3 :
+    			rx = rx_coef3[row];
+    			break;
+    		case 5 : 
+    			rx = rx_coef5[row];
+    			break;
+    		case 7 :
+    			rx = rx_coef7[row];
+    			break;
+    		case 11 :
+    			rx = rx_coef11[row];
+    			break;
+    		case 13 :
+    			rx = rx_coef13[row];
+    		}
+    	
+    		return String.format("A%.2f,%.2f %.2f 0,%d %.2f,%.2f",  rx * distance , distance, angle, sflag, px2, py2);
+    	}
+		//Drawing elliptical curve in cylindrical mode.
+    	else {
+        	double rx = (leveled == 1) ? 0.82 : 0.76; 
+        	
+        	int sflag = (dir == 1) ? 0 : 1;
+        	return String.format("A%.2f,%.2f %d 0,%d %.2f,%.2f",  rx * distance , distance, 0 , sflag, px2, py2);
+    	}
+    }
+    
+    /**
+     * Connects the point (originX, originY) to point (destinationX, destinationY) with a sequence of line segments.
+     * 
+     * @param originX			The x-coordinate of the origin point.
+     * @param originY			The y-coordinate of the origin point.
+     * @param destinationX		The x-coordinate of the destination point.
+     * @param destinationY		The y-coordinate of the destination point.
+     * @param sector			The sector of the Venn diagram containing the two points.
+     * @param mode				The mode of drawing. 0 : regular, 1: Cylindrical.
+     * @return					The string for the sequnce of line segments connecting the two points.
+     */
+    private String drawLine(double originX, double originY, double destinationX, double destinationY, int sector, int mode) {
+    	int numberOfLineSegmenys = 10;
+    	String lineString = "";
+		double lenX = (destinationX - originX) / numberOfLineSegmenys;
+		double lenY = (destinationY - originY) / numberOfLineSegmenys;
+		for (int i = 1; i <= numberOfLineSegmenys; i++) {    			
+    		lineString = lineString + "L" + getPointString(sector, mode, originX + i * lenX, originY + i * lenY);
+		}
+
+    	return lineString;
     }
     
     /**
@@ -542,17 +670,17 @@ public class VennDiagram {
     	//If this is the first (leftmost) vertex of the region
     	if (numberOfBoundingVertices == 0) {
     		//Set the origin vertex as the start of the path
-    		pointStr = pointStr + "M" + makePoint(sector, mode, originX, origin.y);
+    		pointStr = pointStr + "M" + getPointString(sector, mode, originX, origin.y);
     	}
     	
     	if (numberOfBoundingVertices == points[n-3].length + 1 && row == n - 2 && sector == 0) {
-    		innerFace = innerFace + "M" + makePoint(sector, mode, originX, origin.y);    		
+    		innerFace = innerFace + "M" + getPointString(sector, mode, originX, origin.y);    		
     	}
     	
     	//If the two end points of the edge are not in the same row
     	if (origin.nextPoints[0][edgeIndex] != 0) {
-    		//Draw a straight line from origin to destination
-    		pointStr = pointStr + "L" + makePoint(sector, mode, destinationX, destinationY);
+    		//Connect the origin point to destination with a sequence of line segments.
+    		pointStr = pointStr + drawLine(originX, origin.y, destinationX, destinationY, sector, mode);
     	}
     	else {
     		/*
@@ -611,11 +739,12 @@ public class VennDiagram {
         	//If the origin and middle point don't have the same height
             if (originDistance - distance != 0) {
             	/* Get the coordinate of the middle point (the start point of the arc) and 
-            	 * draw a straight line from the origin point to the middle point.
+            	 * draw a sequence of line segments from the origin point to the middle point.
             	 */
                 arcStartX = originX + (originDistance - distance) * edgeDirection;
                 arcStartY = origin.y + edgeDirection * slope * (originDistance - distance);
-                pointStr = pointStr + "L" + makePoint(sector, mode, arcStartX, arcStartY);
+                pointStr = pointStr + drawLine(originX, origin.y, arcStartX, arcStartY, sector, mode);
+                //pointStr = pointStr + "L" + getPointString(sector, mode, arcStartX, arcStartY);
             }
             //If the middle point and the destination don't have the same height
             else if (destinationDistance - distance != 0) {
@@ -625,41 +754,33 @@ public class VennDiagram {
             }
             
             /*
-             * Drawing the arc : The arc is drawn as a cubic Bézier curve from the start point of the arc
+             * Drawing the arc : The arc is drawn as an elliptical arc from the start point of the arc
              * to the end point of the arc using two control points (see SVG curves). 
              */
-            
-            //Compute the height of the two control points of the arc
-            double controlPointsY = arcStartY + edgeDirection * slope * (distance / 1.6);
-            
-            //Compute the horizontal distance of the two control points from the two end points of the arc
-            double controlPointsXDistance = (arcEndX - arcStartX) / 4.0;
-            
-            //Draw a cubic Bézier curve from the current point (the start point of the arc) to the end point of the arc
-            pointStr = pointStr + "C" + makePoint(sector, mode, arcStartX + controlPointsXDistance, controlPointsY) + //First control point
-            							makePoint(sector, mode, arcEndX-controlPointsXDistance, controlPointsY) + //Second control point
-            							makePoint(sector, mode, arcEndX, arcEndY); //The arc end point
-            
+                        
+            //Draw an elliptical arc from the current point (the start point of the arc) to the end point of the arc
+            if (destinationDistance == originDistance)
+            	pointStr = pointStr + drawEllipticalCurve(sector, mode, arcStartX, arcStartY, arcEndX, arcEndY, slope, row, 0);
+            else
+            	pointStr = pointStr + drawEllipticalCurve(sector, mode, arcStartX, arcStartY, arcEndX, arcEndY, slope, row, 1);
+            	
             /*
              * The last edge of each region of the last ring must be also be added to another path to draw the innermost region.  
              */
             if (row == n - 2 && numberOfBoundingVertices == points[n-3].length + 1) {
             	if (sector == 0) {
-            		innerFace = innerFace + "C" + makePoint(sector, mode, arcStartX + controlPointsXDistance, controlPointsY) 
-            									+ makePoint(sector, mode, arcEndX-controlPointsXDistance, controlPointsY) 
-            									+ makePoint(sector, mode, arcEndX, arcEndY);
+            		innerFace = innerFace + drawEllipticalCurve(sector, mode, arcStartX, arcStartY, arcEndX, arcEndY, slope, row, 0);
             	}
             	else {            		
-                	innerFace = innerFace + "C" + makePoint(n - sector, mode, arcStartX + controlPointsXDistance, controlPointsY) 
-                								+ makePoint(n - sector, mode, arcEndX-controlPointsXDistance, controlPointsY) 
-                								+ makePoint(n - sector, mode, arcEndX, arcEndY);
-            	}
+            		innerFace = innerFace + drawEllipticalCurve(n - sector, mode, arcStartX, arcStartY, arcEndX, arcEndY, slope, row, 0);
+           	}
             }
             
             //If the middle point and the destination don't have the same height
             if (destinationDistance - distance != 0) {
-            	//Draw a straight line from the middle point to the destination point.
-                pointStr = pointStr + "L" + makePoint(sector, mode, destinationX, destinationY);
+            	//Draw a sequence of line segments from the middle point to the destination point.
+            	pointStr = pointStr + drawLine(arcEndX, arcEndY, destinationX, destinationY, sector, mode);
+                //pointStr = pointStr + "L" + getPointString(sector, mode, destinationX, destinationY);
             }
     	}
     	
@@ -831,7 +952,7 @@ public class VennDiagram {
         String curveStr = "<path d=\"";
         
         //Add the starting point (the outermost point) to the path.
-        curveStr = curveStr + "M" + makePoint(curveNo, mode, originX, originY);
+        curveStr = curveStr + "M" + getPointString(curveNo, mode, originX, originY);
         do {
             //If the next point is not in the same row
             if (points[row][column].nextPoints[0][2 - dir] != 0) {
@@ -845,8 +966,9 @@ public class VennDiagram {
                 //Get the y coordinate of the next point.
                 destinationY = points[row][column].y;
                 
-                //Draw  the curve segment as a straight line from the curent point to the next point.
-        		curveStr = curveStr + "L" + makePoint(curveNo, mode, destinationX, destinationY);
+                //Draw  the curve segment as a sequence of lines from the current point to the next point.
+        		//curveStr = curveStr + "L" + getPointString(curveNo, mode, destinationX, destinationY);
+        		curveStr = curveStr + drawLine(originX, originY, destinationX, destinationY, curveNo, mode);
             } else {
             	/*Otherwise, we need to draw an arc from the current point to the next point
             	 * if they both have the same height or we need to find a middle point that has 
@@ -882,8 +1004,8 @@ public class VennDiagram {
                 	//Find the middle point as the start point of the arc.
                 	arcStartX = originX + originDistance - distance;
                 	arcStartY = originY + dir * (originDistance - distance);
-                	//Draw a straight line from the origin to the middle point.
-                    curveStr = curveStr + "L" + makePoint(curveNo, mode, arcStartX, arcStartY);
+                	//Draw a sequence of line segments from the origin to the middle point.
+                    curveStr = curveStr + drawLine(originX, originY, arcStartX, arcStartY, curveNo, mode);
                 }
                 //If destination and the middle point don't have the same height.
                 else if (destinationDistance - distance != 0) {
@@ -892,22 +1014,19 @@ public class VennDiagram {
                     arcEndY = destinationY + dir * (destinationDistance - distance);
                 }
                 
-                //Compute the height of the two control points of the arc
-                double controlPointsY = arcStartY + dir * (distance / 1.6);
-                //Compute the horizontal distance of the two control points from the two end points of the arc
-                double controlPointsXDistance = (arcEndX - arcStartX) / 4.0;
-                //Draw a cubic Bézier curve from the current point (the start point of the arc) to the end point of the arc
-                curveStr = curveStr + "C" + makePoint(curveNo, mode, arcStartX + controlPointsXDistance, controlPointsY) 
-                							+ makePoint(curveNo, mode, arcEndX - controlPointsXDistance, controlPointsY) 
-                							+ makePoint(curveNo, mode, arcEndX, arcEndY);
+                //Draw an elliptical arc from the current point (the start point of the arc) to the end point of the arc
+                if (destinationDistance == originDistance)
+                	curveStr = curveStr + drawEllipticalCurve(curveNo, 0, arcStartX, arcStartY, arcEndX, arcEndY, dir, row, 0);
+                else
+                	curveStr = curveStr + drawEllipticalCurve(curveNo, 0, arcStartX, arcStartY, arcEndX, arcEndY, dir, row, 1);
                 
                 //Change the direction od curve segments because of the arc.
                 dir = -dir;
                 if (destinationDistance - distance != 0) {
-                	/* Draw a straight line from the arc end point to the destination point if the middle point
+                	/* Draw a sequence of line segments from the arc end point to the destination point if the middle point
                 	 * and the destination point don't have the same height.
                 	 */
-                    curveStr = curveStr + "L" + makePoint(curveNo, mode, destinationX, destinationY);
+                    curveStr = curveStr + drawLine(arcEndX, arcEndY, destinationX, destinationY, curveNo, mode);
                 }
                 
                 //Get the column of the next point.
@@ -922,7 +1041,7 @@ public class VennDiagram {
         } while(row != 0 || column != 0 || dir == 1);
         
         //Write the curve path to the file of the Venn diagram.
-        curveStr = curveStr + "\" stroke=\"" + strokeColor + "\" stroke-width=\"1.0\" fill=\"none\"/>";
+        curveStr = curveStr + "\" stroke=\"" + strokeColor + "\" stroke-width=\"2.0\" fill=\"none\"/>";
         vennFile.println(curveStr);
     }
     
@@ -945,11 +1064,10 @@ public class VennDiagram {
     	//Getting the total length of the sector (pie-slice).
         double sectorLen = points[0][0].nextLen[1];
         
-        verticalUnitLen = 0.75 / (sectorLen);                       //Vertical unit length
+        //verticalUnitLen = 0.75 / (sectorLen);                       //Vertical unit length
+        verticalUnitLen = 2 * Math.PI /(n * sectorLen);                       //Vertical unit length
         horizontalUnitLen = 2 * Math.PI /(n * sectorLen);			//Horizontal unit length
         
-        horizontalOffset = 500 * n;
-        verticalOffset = 500 * n;
 
         PrintWriter vennFile = null;
         String fileName;
@@ -974,9 +1092,26 @@ public class VennDiagram {
 	        vennFile.println("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"");
 	        vennFile.println("\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">");
 	        if (mode == 0) {
-		        int width = 1000 * n;
-		        int height = 1000 * n;
 		        //Defining dimension of the diagram. 
+	        	int width = 1000;
+	        	int height = 1000;
+	        	
+	        	switch (n) {
+	        	case 5 :
+	        		width = height = 650;
+	        		break;
+	        	case 7 :
+	        		width = height = 1200;
+	        		break;
+	        	case 11 :
+	        		width = height = 5200;
+	        		break;
+	        	case 13 :
+	        		width = height = 11500;
+	        	}
+	    
+		        horizontalOffset = width / 2.0;
+		        verticalOffset = height / 2.0;
 	        	//vennFile.println("<svg width=\"6950\" height=\"6950\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">");
 	        	vennFile.println("<svg width=\"" + width + "\" height=\"" + height + "\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">");
 	        }
@@ -985,8 +1120,8 @@ public class VennDiagram {
 		        horizontalUnitLen = verticalUnitLen = 2 * Math.PI /(n * sectorLen);			//Horizontal unit length
 		        
 		        //Defining dimension of the diagram. 
-		        int width = (int) ((2 * points[0][0].x + n * sectorLen) * horizontalUnitLen * n * n * n);
-		        int height = (int) ((10 + sectorLen + (points[0][0].y - points[n-2][0].y)) * verticalUnitLen * n * n * n);
+		       int width = (int) ((2 * points[0][0].x + n * sectorLen) * horizontalUnitLen * n * n * n);
+		       int height = (int) ((10 + sectorLen + (points[0][0].y - points[n-2][0].y)) * verticalUnitLen * n * n * n);
 		        vennFile.println("<svg width=\"" + width + "\" height=\"" + height + "\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">");
 		        
 		        //Computing the vertical and horizontal offsets. These values are added to the x and y coordinate of each point
@@ -999,7 +1134,7 @@ public class VennDiagram {
 	        
 	        double nextX = 0.0;
 	        
-		    for (int i = 0; i < n - 1; i++) {
+		    for (int i = 0; i < n-1; i++) {
 		    	
 		    	//Find the x coordinate of the starting region in ring (i + 1)
 	        	double startX = points[i][startIndex[i]].x;
@@ -1066,14 +1201,29 @@ public class VennDiagram {
 	    	//Getting the total length of the sector (pie-slice).
 	        double sectorLen = points[0][0].nextLen[1];
 	        
-	        verticalUnitLen = 0.75 / (sectorLen);                       //Vertical unit length
-	        horizontalUnitLen = 2 * Math.PI /(n * sectorLen);			//Horizontal unit length
+	        verticalUnitLen = 2 * Math.PI / (n * sectorLen);                       //Vertical unit length
+	        horizontalUnitLen = 2 * Math.PI / (n * sectorLen);			//Horizontal unit length
 	        
-	        horizontalOffset = 500 * n;
-	        verticalOffset = 500 * n;
+        	int width = 1000;
+        	int height = 1000;
+        	
+        	switch (n) {
+        	case 5 :
+        		width = height = 650;
+        		break;
+        	case 7 :
+        		width = height = 1200;
+        		break;
+        	case 11 :
+        		width = height = 5200;
+        		break;
+        	case 13 :
+        		width = height = 11500;
+        	}
+    
+	        horizontalOffset = width / 2;
+	        verticalOffset = height / 2;
 	        
-	        int width = 1000 * n;
-	        int height = 1000 * n;
 	        //Defining dimension of the diagram. 
 	        vennFile.println("<svg width=\"" + width + "\" height=\"" + height + "\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">");
 	        
@@ -1169,7 +1319,7 @@ public class VennDiagram {
 		        int dir = 1;     //Indicates the slope of line segments.
 		        
 		        //Starting a new curve segment.
-		        String curveStr = "<path d=\"M" + makePoint(0, 1, originX, originY);
+		        String curveStr = "<path d=\"M" + getPointString(0, 1, originX, originY);
 		        
 		        do {
 		        	//If the next point is not in the same row
@@ -1189,7 +1339,7 @@ public class VennDiagram {
 		                    rightEndY = destinationY - dir * (destinationX - rightEndX);
 		                    
 		                    //Add a line segment from the current point to the boundary point.
-		                    curveStr = curveStr + "L" + makePoint(0, 1, rightEndX, rightEndY);
+		                    curveStr = curveStr + "L" + getPointString(0, 1, rightEndX, rightEndY);
 		                    //Write the path to the file
 		                    curveStr = curveStr + "\" stroke=\"" + colors[curveNo] + "\" stroke-width=\"1.0\" fill=\"none\"/>";
 		                    vennFile.println(curveStr);
@@ -1200,7 +1350,7 @@ public class VennDiagram {
 		                     */
 		                    curveNo = (curveNo + 1) % n;
 		                    destinationX -= sectorLen;
-		                    curveStr = "<path d=\"M" + makePoint(0, 1, startX, rightEndY);
+		                    curveStr = "<path d=\"M" + getPointString(0, 1, startX, rightEndY);
 		                }
 		            } 
 		            else {
@@ -1218,7 +1368,7 @@ public class VennDiagram {
 		                    rightEndY = headPointY - dir * (headPointX - rightEndX);
 		                    
 		                    //Add a new line segment from the current point to the boundary point.
-		                    curveStr = curveStr + "L" + makePoint(0, 1, rightEndX, rightEndY);
+		                    curveStr = curveStr + "L" + getPointString(0, 1, rightEndX, rightEndY);
 		                    curveStr = curveStr + "\" stroke=\"" + colors[curveNo] + "\" stroke-width=\"1.0\" fill=\"none\"/>";
 		                    vennFile.println(curveStr);
 		                    
@@ -1227,11 +1377,11 @@ public class VennDiagram {
 		                    
 		                    headPointX -= sectorLen;
 		                    destinationX -= sectorLen;
-		                    curveStr = "<path d=\"M" + makePoint(0, 1, startX, rightEndY); 
+		                    curveStr = "<path d=\"M" + getPointString(0, 1, startX, rightEndY); 
 		                }
 		                
 		                //Add the line segment from the current/boundary point to the head point. 
-		                curveStr = curveStr + "L" + makePoint(0, 1, headPointX, headPointY);
+		                curveStr = curveStr + "L" + getPointString(0, 1, headPointX, headPointY);
 		                
 		                //If the next point passes the right boundary of the sector
 		                if (destinationX - startX > sectorLen){
@@ -1240,14 +1390,14 @@ public class VennDiagram {
 		                    rightEndY = destinationY + dir * (destinationX - rightEndX);
 		                    
 		                    //Add a line segment from the current point to the boundary point.
-		                    curveStr = curveStr + "L" + makePoint(0, 1, rightEndX, rightEndY);
+		                    curveStr = curveStr + "L" + getPointString(0, 1, rightEndX, rightEndY);
 		                    curveStr = curveStr + "\" stroke=\"" + colors[curveNo] + "\" stroke-width=\"1.0\" fill=\"none\"/>";
 		                    vennFile.println(curveStr);
 		                    
 		                    //Start a new curve segment.
 		                    curveNo = (curveNo + 1) % n;	                    
 		                    destinationX -= sectorLen;
-		                    curveStr = "<path d=\"M" + makePoint(0, 1, startX, rightEndY);
+		                    curveStr = "<path d=\"M" + getPointString(0, 1, startX, rightEndY);
 		                }
 		                
 		                //Change the slope.
@@ -1257,7 +1407,7 @@ public class VennDiagram {
 		            }
 		            
 		            //Add a line segment from the current/head/boundary point to the next point.
-		            curveStr = curveStr + "L" + makePoint(0, 1, destinationX, destinationY);
+		            curveStr = curveStr + "L" + getPointString(0, 1, destinationX, destinationY);
 		            
 		            originX = destinationX;
 		            originY = destinationY;
