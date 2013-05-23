@@ -557,7 +557,7 @@ public class VennDiagram {
     
     private String drawEllipticalCurve(int sector, int mode, double x1, double y1, double x2, double y2, int dir, int row, int leveled) {
     	
-    	double [] rx_coef3 = {1.0, 3.0};
+    	double [] rx_coef3 = {0.45, 1.5};
     	double [] rx_coef5 = {0.51, 0.65, 1.0, 1.5};
     	double [] rx_coef7 = {0.58, 0.72, 0.78, 0.84, 0.9, 1.2}; 
     	double [] rx_coef11 = {0.65, 0.72, 0.73, 0.74, 0.74, 0.75, 0.78, 0.8, 0.85, 0.95}; 
@@ -1097,6 +1097,9 @@ public class VennDiagram {
 	        	int height = 1000;
 	        	
 	        	switch (n) {
+	        	case 3 :
+	        		width = height = 250;
+	        		break;
 	        	case 5 :
 	        		width = height = 650;
 	        		break;
@@ -1208,6 +1211,9 @@ public class VennDiagram {
         	int height = 1000;
         	
         	switch (n) {
+        	case 3 :
+        		width = height = 250;
+        		break;
         	case 5 :
         		width = height = 650;
         		break;
