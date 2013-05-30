@@ -557,6 +557,9 @@ public class VennDiagram {
     
     private String drawEllipticalCurve(int sector, int mode, double x1, double y1, double x2, double y2, int dir, int row, int leveled) {
     	
+    	/*
+    	* Not finalized, Need a more general algorithm.
+    	*/
     	double [] rx_coef3 = {0.45, 1.5};
     	double [] rx_coef5 = {0.51, 0.65, 1.0, 1.5};
     	double [] rx_coef7 = {0.58, 0.72, 0.78, 0.84, 0.9, 1.2}; 
