@@ -41,7 +41,7 @@ import java.util.Scanner;
  *
  */
 
-public class MainApp {
+public class VennPlot {
   
 	/**
 	 * The number of curves of the Venn diagrams.
@@ -69,7 +69,7 @@ public class MainApp {
 	 * @param n            The number of curves of Venn diagrams.
 	 * @param fileName     The name of input file that contains the crossing sequence of Venn diagrams.
 	 */
-	public MainApp(int n, String fileName, String colorsFile) {
+	public VennPlot(int n, String fileName, String colorsFile) {
 		this.n = n;
 		this.inputFileName = fileName;
 		this.colorsFileName = colorsFile;
@@ -249,7 +249,7 @@ public class MainApp {
     	}
     	
     	//Create an instance of the application and generate the plot of the input Venn diagrams.
-    	MainApp app = new MainApp(n, args[1], args[2]);
+    	VennPlot app = new VennPlot(n, args[1], args[2]);
     	if (app.readColors() == 0) {
     		app.createDiagrams(fillingMode, drawingMode);
     	}    	
