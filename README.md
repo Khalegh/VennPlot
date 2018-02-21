@@ -35,17 +35,23 @@ A pie-slice of symmetric 3-Venn diagram :<br>
                             ___________/ \____
    
 </pre></blockcode></p>
-<p><blockcode><pre>
-Binary Matrix :<br>
-                                1      0          
-                                        
-                                0      1
-                                        
-                              -------------
-                                 
-Crossing Sequence :<br>
-                                0   ,   1
-</pre></blockcode></p>
+<table style="height: 120px; width: 300px;">
+<tbody>
+<tr>
+<td style="width: 200px;" rowspan="2">Binary Matrix</td>
+<td style="width: 50px; text-align: center;">1</td>
+<td style="width: 50px; text-align: center;">0</td>
+</tr>
+<tr>
+<td style="width: 50px; text-align: center;">0</td>
+<td style="width: 50px; text-align: center;">1</td>
+</tr>
+<tr>
+<td style="width: 200px;">Crossing Sequence</td>
+<td style="width: 100px; text-align: center;" colspan="2">0, 1</td>
+</tr>
+</tbody>
+</table>
 
 The crossing sequence of some simple symmetric Venn diagram with different number of curves, including the first
 simple syymetric 11-Venn diagram named Newroz [2], are available under directory InputData. 
