@@ -36,14 +36,14 @@ A pie-slice of symmetric 3-Venn diagram :<br>
    
 </pre></blockcode></p>
 <p><blockcode><pre>
-   Binary Matrix :
+Binary Matrix :<br>
                                 1      0          
-                            
+                                        
                                 0      1
+                                        
+                              -------------
                                  
-                             ---------------
-                                 
-   Crossing Sequence : 
+Crossing Sequence :<br>
                                 0   ,   1
 </pre></blockcode></p>
 
@@ -73,7 +73,7 @@ Below are two example diagrams drawn by the program.
 To draw the Venn diagrams, you first need to compile the java code:
 
 ```java
-javac VennPlot.java</code>
+javac VennPlot.java
 ```
 
 Then draw the Venn diagrams using appropriate Crossing sequence and color-code files.
