@@ -24,8 +24,8 @@ contains a 1 at column i.
 
 For example the famous three circle Venn diagram can be represented by the following binary matrix and crossing sequence.
 
-<blockcode>
-A pie-slice of symmetric 3-Venn diagram :
+<p><blockcode><pre>
+A pie-slice of symmetric 3-Venn diagram :<br> 
                             ____   ___________
                                 \ /
                                  o
@@ -34,19 +34,18 @@ A pie-slice of symmetric 3-Venn diagram :
                                         o
                             ___________/ \____
    
-</blockcode>
-
-<blockcode>
-   Binary Matrix :             
+</pre></blockcode></p>
+<p><blockcode><pre>
+   Binary Matrix :
                                 1      0          
                             
                                 0      1
-                                  
+                                 
                              ---------------
                                  
    Crossing Sequence : 
                                 0   ,   1
-</blockcode>
+</pre></blockcode></p>
 
 The crossing sequence of some simple symmetric Venn diagram with different number of curves, including the first
 simple syymetric 11-Venn diagram named Newroz [2], are available under directory InputData. 
@@ -73,14 +72,17 @@ Below are two example diagrams drawn by the program.
 #### How to draw the diagrams:
 To draw the Venn diagrams, you first need to compile the java code:
 
-<code>javac VennPlot.java</code>
+```java
+javac VennPlot.java</code>
+```
 
 Then draw the Venn diagrams using appropriate Crossing sequence and color-code files.
 For example, running the program with the following arguments, draws all 23 simple symmetric monotone 7-Venn diagrams 
 (See [3] for more information about generating Venn diagrams).
 
-<code> java VennPlot 7 ./InputData/CrossingSequences/VennSeven.txt ./InputData/ColorCodes/SevenColors.txt 1 0<code>
-
+```java
+java VennPlot 7 ./InputData/CrossingSequences/VennSeven.txt ./InputData/ColorCodes/SevenColors.txt 1 0
+```
 
 Please feel free to contact me at Khalegh@gmail.com if you have any questions or comments about this code.
 
@@ -88,7 +90,7 @@ Please feel free to contact me at Khalegh@gmail.com if you have any questions or
 
 1. Frank Ruskey and Mark Weston, [**A Survey of Venn Diagrams**](http://theory.cs.uvic.ca/~cos/venn/VennEJC.html).
 
-2. K. Mamakani and F. Ruskey, [**A New Rose : The First Simple Symmetric 11-Venn Diagram**}(http://arxiv.org/abs/1207.6452).
+2. K. Mamakani and F. Ruskey, [**A New Rose : The First Simple Symmetric 11-Venn Diagram**](http://arxiv.org/abs/1207.6452).
 
 3. K. Mamakani, W. Myrvold and F. Ruskey, **Generating Simple Convex Venn Diagrams**, Journal of Discrete Algorithms, 16 (2012) 270-286.
 
